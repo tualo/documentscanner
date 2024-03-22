@@ -165,24 +165,28 @@ Ext.define('Tualo.Documentscanner.field.Camera', {
         // M = cv2.getRotationMatrix2D((cX, cY), -90, 1.0)
         // rotated = cv2.warpAffine(image, M, (w, h))
 
-        //this.showMat(src);
-        let contours = this.findPaperContour(src);
-        // console.log(contours);
-        //this.drawContour({color: 'green', thickness: 20}, contours,src);
+        try{
+          //this.showMat(src);
+          let contours = this.findPaperContour(src);
+          // console.log(contours);
+          //this.drawContour({color: 'green', thickness: 20}, contours,src);
 
-        let h = 21/2.54 *200
-        let w = 29.7 /2.54 *200
-        extractPaper = this.extractPaper(src, contours, w, h);
+          let h = 21/2.54 *200
+          let w = 29.7 /2.54 *200
+          extractPaper = this.extractPaper(src, contours, w, h);
 
-        // this.showMat(src);
-        
-        cv.rotate(extractPaper, extractPaper,  cv.ROTATE_90_COUNTERCLOCKWISE);
-        // cv.rotate(extractPaper, extractPaper,  cv.ROTATE_90_CLOCKWISE);
+          // this.showMat(src);
+          
+          cv.rotate(extractPaper, extractPaper,  cv.ROTATE_90_COUNTERCLOCKWISE);
+          // cv.rotate(extractPaper, extractPaper,  cv.ROTATE_90_CLOCKWISE);
 
-        this.avgImages(extractPaper);
+          this.avgImages(extractPaper);
 
-        src.delete();
-        extractPaper.delete();
+          src.delete();
+          extractPaper.delete();
+        }catch(e){
+          console.log(e);
+        }
         setTimeout(this.handleImage.bind(this), 10);
     },
 
