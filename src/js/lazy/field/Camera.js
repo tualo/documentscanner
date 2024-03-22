@@ -196,6 +196,20 @@ Ext.define('Tualo.Documentscanner.field.Camera', {
     showMat: function(mat){
         let canvas = this.getCanvasElement();
         cv.imshow(canvas, mat);
+
+        if (!this.tesseract_is_working){
+          this.tesseract_is_working = true;
+          Tesseract.recognize(canvas, 'deu',{
+            workerPath: './tesseract.js/lib/dist/worker.min.js',
+            langPath: './tesseract.js/lib/tessdata/4.0.0/',
+            corePath: './tesseract.js/lib/core/',
+  
+        }).then(({ data: { text } }) => {
+            console.log(text);
+            this.tesseract_is_working = false;
+        });
+        }
+    
     },
 
     getCornerPoints(contour) {
