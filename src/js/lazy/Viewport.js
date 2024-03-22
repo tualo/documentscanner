@@ -1,23 +1,17 @@
 Ext.define('Tualo.Documentscanner.Viewport', {
-    extend: 'Ext.form.Panel',
-    requires: [],
-    //layout: 'fit',
+    extend: 'Ext.panel.Panel',
+    requires: [
+        'Tualo.Documentscanner.field.Input',
+        'Tualo.Documentscanner.field.Camera'
+    ],
+    layout: 'fit',
     bodyPadding: 10,
     items:[
         {
-            xtype: 'textfield',
-            value: '',
-            anchor: '100%',
-            fieldLabel: 'Phonenumber',
-            name: 'phonenumber'
-        },
-        {
-            xtype: 'textfield',
-            value: '',
-            anchor: '100%',
-            fieldLabel: 'Message',
-            name: 'message'
-        },
+            xtype: 'tualo_camera',
+            //xtype: 'tualo_documentscanner',
+            
+        }            
     ],
     buttons:[
         {

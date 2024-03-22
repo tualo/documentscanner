@@ -8,7 +8,8 @@ class Middleware implements IMiddleware{
     public static function register(){
         TualoApplication::use('jsdocumentscanner',function(){
             try{
-                TualoApplication::javascript('jsdocumentscanner', './lazy/lib/jscanify.min.js',[],-10000);
+                // TualoApplication::module('jsdocumentscanner', './jsdocumentscanner/lib/test.js',[],-10000);
+                TualoApplication::javascript('jsdocumentscanner', './jsdocumentscanner/lib/jscanify.min.js',[],-10000);
                 // TualoApplication::stylesheet( './cherry-markdownlib/dist/cherry-markdown.min.css',10000);
             }catch(\Exception $e){
                 TualoApplication::set('maintanceMode','on');

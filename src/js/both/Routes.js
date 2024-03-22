@@ -13,8 +13,12 @@ Ext.define('Tualo.routes.Documentscanner', {
     url: 'documentscanner/test',
     handler: {
         action: function () {
-            
-            Ext.getApplication().addView('Tualo.Documentscanner.Viewport');
+            console.log('success','a');
+            Ext.require('Tualo.'+'Documentscanner.Viewport', function(){
+                console.log('success','b');
+                Ext.getApplication().addView('Tualo.Documentscanner.Viewport');
+            });
+            //
         },
         before: function (action) {
             action.resume();
