@@ -313,7 +313,14 @@ Ext.define('Tualo.Documentscanner.field.Camera', {
             } = cornerPoints || this.getCornerPoints(maxContour, img);
             let warpedDst = new cv.Mat();
      
-            if (topLeftCorner){
+            if (
+              
+              topLeftCorner && 
+              topRightCorner && 
+              bottomLeftCorner && 
+              bottomRightCorner
+              
+              ){
                 let dsize = new cv.Size(resultWidth, resultHeight);
                 let srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
                 topLeftCorner.x,
