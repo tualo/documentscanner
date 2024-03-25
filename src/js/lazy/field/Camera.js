@@ -180,7 +180,8 @@ Ext.define('Tualo.Documentscanner.field.Camera', {
           cv.rotate(extractPaper, extractPaper,  cv.ROTATE_90_COUNTERCLOCKWISE);
           // cv.rotate(extractPaper, extractPaper,  cv.ROTATE_90_CLOCKWISE);
 
-          this.avgImages(extractPaper);
+          this.showMat(extractPaper);
+          // this.avgImages(extractPaper);
 
           src.delete();
           extractPaper.delete();
@@ -197,12 +198,137 @@ Ext.define('Tualo.Documentscanner.field.Camera', {
         return this.dstC1;
     },
 
+    erosion: function (src) {
+      let kernelSize = 13;
+
+      let dst = new cv.Mat(src.rows, src.cols, cv.CV_8UC4);
+      let kernel = cv.Mat.ones(kernelSize, kernelSize, cv.CV_8U);
+      let color = new cv.Scalar();
+      cv.erode(src, dst, kernel, { x: -1, y: -1 }, 1, Number(cv.MORPH_ELLIPSE), color);
+      kernel.delete();
+      return dst;
+  },
+
+    findCircles: function(src){
+        let circles = new cv.Mat();
+        let color = new cv.Scalar(255, 0, 0);
+        let canvas = this.getCanvasElement();
+        console.log('f');
+        
+        var out = new cv.Mat();
+
+        let dsize = new cv.Size( src.cols/2, src.rows/2);
+
+        cv.resize(src, out, dsize, 0, 0, cv.INTER_AREA);
+
+        let imgGray = new cv.Mat();
+        cv.cvtColor(out, imgGray, cv.COLOR_RGBA2GRAY);
+
+        imgGray = this.erosion(imgGray);
+        /*cv.GaussianBlur(
+          imgGray,
+          imgGray,
+          new cv.Size(3, 3),
+          0,
+          0,
+          cv.BORDER_DEFAULT
+        );
+        */
+
+
+        
+        // cv.HoughCircles(imgGray, circles, cv.HOUGH_GRADIENT, 2, imgGray.rows/4, 200, 100 );
+        if (false){
+        cv.HoughCircles(imgGray, circles, cv.HOUGH_GRADIENT, 10, 20, 75, 40, 10, 20);
+      // draw circles
+      for (let i = 0; i < circles.cols; ++i) {
+      let x = circles.data32F[i * 3];
+      let y = circles.data32F[i * 3 + 1];
+      let radius = circles.data32F[i * 3 + 2];
+      let center = new cv.Point(x, y);
+      cv.circle(imgGray, center, radius, color);
+      }}
+      
+      //cv.imshow('canvasOutput', dst);
+      //src.delete(); dst.delete(); circles.delete();
+
+        
+        // resized_down = cv.resize(image, down_points, interpolation= cv2.INTER_LINEAR)
+
+
+        cv.imshow(canvas, imgGray);
+
+        return;
+
+        cv.GaussianBlur(
+          src,
+          src,
+          new cv.Size(21, 21),
+          0,
+          0,
+          cv.BORDER_DEFAULT
+        );
+
+        /*
+        GaussianBlur( gray, gray, Size(9, 9), 2, 2 );
+        vector<Vec3f> circles;
+        
+        */
+        let c_olor = new cv.Scalar(255, 0, 0);
+
+        cv.HoughCircles(src, circles, cv.HOUGH_GRADIENT, 2, src.rows/4, 200, 100 );
+
+        for (let i = 0; i < circles.width; ++i) {
+          let x = circles.data32F[i * 3];
+          let y = circles.data32F[i * 3 + 1];
+          let radius = circles.data32F[i * 3 + 2];
+          let center = new cv.Point(x, y);
+          cv.circle(out, center, radius, color, 3);
+          
+          //let distance = (RADIUS_OF_MARKER * FOCAL_LENGTH) / radius;
+          //console.log("Distance is : " + distance + " cm");
+          // cv.putText(dst, "Distance is : " + distance + "cm", {x: dst.x, y: dst.y}, cv.FONT_HERSHEY_SIMPLEX, 1.0, [0, 255, 0, 255]);
+          // $("#difference").html("<b> Distance is : </b>" + distance);
+      }
+
+        // cv.HoughCircles(src, circles, cv.HOUGH_GRADIENT, 1, 10);
+        // , 1, 45, 75, 40, 0, 0);
+        console.log('findCircles',circles.data); 
+        /*
+        let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+        for (let i = 0; i < circles.cols; ++i) {
+            let x = circles.data32F[i * 3];
+            let y = circles.data32F[i * 3 + 1];
+            let radius = circles.data32F[i * 3 + 2];
+            let center = new cv.Point(x, y);
+            cv.circle(dst, center, radius, new cv.Scalar(0, 0, 255), 2);
+        }*/
+        //this.showMat(dst);
+        cv.imshow(canvas, out);
+        circles.delete();
+        if (this.canStop){
+          this.currentStream.getTracks().forEach(track => {
+            track.stop();
+          });
+        }
+        this.canStop=true;
+        out.delete();
+    },
+
     showMat: function(mat){
         let canvas = this.getCanvasElement();
-        cv.imshow(canvas, mat);
+        
+        this.findCircles(mat);
+        //cv.imshow(canvas, mat);
 
+
+        // cv.HoughCircles(src, circles, cv.HOUGH_GRADIENT, 1, 45, 75, 40, 0, 0);
+
+        //this.getBarcode(canvas);
+        /*
         if (!this.tesseract_is_working){
           this.tesseract_is_working = true;
+          
           Tesseract.recognize(canvas, 'deu',{
             workerPath: './tesseract.js/lib/dist/worker.min.js',
             langPath: './tesseract.js/lib/tessdata/4.0.0/',
@@ -213,7 +339,72 @@ Ext.define('Tualo.Documentscanner.field.Camera', {
             this.tesseract_is_working = false;
         });
         }
+        */
     
+    },
+
+    findMyContours: function(){
+      cv.findContours(
+        imgThresh,
+        contours,
+        hierarchy,
+        cv.RETR_CCOMP,
+        cv.CHAIN_APPROX_SIMPLE
+      );
+      let maxArea = 0;
+      let maxContourIndex = -1;
+      for (let i = 0; i < contours.size(); ++i) {
+        console.log('contour',i,contours.get(i));
+        let contourArea = cv.contourArea(contours.get(i));
+        if (contourArea > maxArea) {
+          maxArea = contourArea;
+          maxContourIndex = i;
+        }
+      }
+    },
+
+    getBarcode: async function(canvas){
+
+      if (!this.getbarcode_is_working){
+        this.getbarcode_is_working = true;
+        const 
+          context = canvas.getContext('2d'),
+          imageData = context.getImageData(0, 0, canvas.width, canvas.height),
+          symbols = await zbarWasm.scanImageData(imageData);
+    
+        symbols.forEach(s => {
+          s.rawData = s.decode()
+          context.lineWidth = 1;
+          context.strokeStyle = 'red';
+          context.beginPath();
+          
+          let start = s.points[0].x;  
+          let factor  = (s.points[2].x - s.points[0].x) / 1.8;
+          /*
+          console.log('1.8cm ~ ',s.points[2].x - s.points[0].x,s.points, canvas.width / (s.points[2].x - s.points[0].x) /1.8);
+          context.moveTo(s.points[0].x, s.points[0].y);
+          context.lineTo(s.points[1].x, s.points[1].y);
+          context.lineTo(s.points[2].x, s.points[2].y);
+          context.lineTo(s.points[3].x, s.points[3].y);
+          context.lineTo(s.points[0].x, s.points[0].y);
+          context.stroke();
+
+          context.lineWidth = 3;
+          context.strokeStyle = 'green';
+
+          context.beginPath();
+          context.moveTo(s.points[0].x + 4*factor, s.points[0].y);
+          context.lineTo(s.points[1].x + 4*factor, s.points[1].y);
+          context.lineTo(s.points[2].x + 4*factor, s.points[2].y);
+          context.lineTo(s.points[3].x + 4*factor, s.points[3].y);
+          context.lineTo(s.points[0].x + 4*factor, s.points[0].y);
+          context.stroke();
+          */
+          // imageData = context.getImageData(0, 0, canvas.width, canvas.height),
+        })
+        console.log(symbols);
+        this.getbarcode_is_working = false;
+      }
     },
 
     getCornerPoints(contour) {
