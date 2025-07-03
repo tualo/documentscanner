@@ -1,22 +1,25 @@
 {
-    "name": "tualo/documentscanner",
-    "description": "tualo - documentscanner",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Thomas Hoffmann",
-            "email": "thomas.hoffmann@tualo.de"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Tualo\\Office\\Documentscanner\\": "src/"
-        },
-        "files": ["src/functions.php"]
-    },
-    "minimum-stability": "dev",
-    "require": {
-        "guzzlehttp/guzzle": "*"
+  "name": "tualo/documentscanner",
+  "description": "tualo - documentscanner",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Thomas Hoffmann",
+      "email": "thomas.hoffmann@tualo.de"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tualo\\Office\\Documentscanner\\": "src/"
+    },
+    "files": [
+      "src/functions.php"
+    ]
+  },
+  "minimum-stability": "dev",
+  "require": {
+    "guzzlehttp/guzzle": "^7.9.3"
+  },
+  "version": "1.0.1"
 }
