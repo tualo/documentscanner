@@ -21,5 +21,5 @@
   "require": {
     "guzzlehttp/guzzle": "^7.9.3"
   },
-  "version": "1.0.2"
+  "version": "1.0.3"
 }
